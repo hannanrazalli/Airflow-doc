@@ -57,6 +57,7 @@ C:\astro-cli\astro.exe dev start
 
 ---------------------------------------------------------------------------------------------
 DAG FILE (CTH: practice_1.py)
+
 import os
 from datetime import datetime
 from pathlib import Path
@@ -94,7 +95,7 @@ dbt_oms_dag = DbtDag(
         load_method=LoadMode.DBT_LS,
         dbt_deps=False,        # <--- WAJIB TAMBAH NI untuk selaraskan dengan install_deps
     ),
-    schedule="0 * * * *",
+    schedule="0 16 * * *",
     start_date=datetime(2024, 1, 1),
     catchup=False,
     dag_id="medallion_practice", # Pastikan unik bagi setiap file .py
