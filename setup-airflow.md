@@ -66,37 +66,34 @@ from cosmos import DbtDag, ProjectConfig, ProfileConfig, RenderConfig
 from cosmos.constants import LoadMode
 from cosmos.profiles import GoogleCloudServiceAccountDictProfileMapping
 
-# 1. Path dalam Docker Astro (Ikut struktur folder include/dbt/oms_dbt_proj)
 DBT_PROJECT_PATH = Path("/usr/local/airflow/include/dbt/oms_dbt_proj")
 
-# 2. Setup Profile
 profile_config = ProfileConfig(
-    profile_name="oms_dbt_proj",
-    target_name="dev",
-    profile_mapping=GoogleCloudServiceAccountDictProfileMapping(
-        conn_id="google_cloud_default", 
-        profile_args={
-            "project": "transactions-practice",
-            "dataset": "bronze", 
-            "location": "asia-southeast1",
+    profile_name = "oms_dbt_proj",
+    target_name = "dev",
+    profile_mapping = GoogleCloudServiceAccountDictProfileMapping(
+        conn_id = "google_cloud_default",
+        profile_args = {
+            "project" : "transactions-practice",
+            "dataset" : "bronze",
+            "location" : "asia-southeast1",
         },
     ),
 )
 
-# 3. Define DAG
-dbt_oms_dag = DbtDag(
-    project_config=ProjectConfig(DBT_PROJECT_PATH),
-    operator_args={
-        "install_deps": False, # MESTI sama dengan dbt_deps di bawah
-        "full_refresh": True, 
+dbt_dag = DbtDag(
+    project_config = ProjectConfig(DBT_PROJECT_PATH),
+    operator_args = {
+        "install_deps" : False,
+        "full_refresh" : True
     },
-    profile_config=profile_config,
-    render_config=RenderConfig(
-        load_method=LoadMode.DBT_LS,
-        dbt_deps=False,        # <--- WAJIB TAMBAH NI untuk selaraskan dengan install_deps
+    profile_config = profile_config,
+    render_config = RenderConfig(
+        load_method = LoadMode.DBT_LS,
+        dbt_deps = False
     ),
-    schedule="0 16 * * *",
-    start_date=datetime(2024, 1, 1),
-    catchup=False,
-    dag_id="medallion_practice", # Pastikan unik bagi setiap file .py
+    schedule = "0 */2 * * *",
+    start_date = datetime(2024, 1, 1),
+    catchup = False,
+    dag_id = "medallion_practice"
 )
