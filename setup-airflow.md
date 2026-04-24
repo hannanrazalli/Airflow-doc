@@ -97,3 +97,68 @@ dbt_dag = DbtDag(
     catchup = False,
     dag_id = "medallion_practice"
 )
+
+
+
+------------------------------------------------------------------------------------------
+
+import os
+from datetime import datetime
+from pathlib import Path
+
+from cosmos import DbtDag, ProjectConfig, ProfileConfig, RenderConfig
+from cosmos.constants import LoadMode
+from cosmos.profiles import GoogleCloudServiceAccountDictProfileMapping
+
+# --- CONFIGURATION & PATHS ---
+# Senior style: Gunakan constants supaya senang tukar lokasi di masa depan
+DBT_PROJECT_PATH = Path(os.getenv("AIRFLOW_HOME", "/usr/local/airflow")) / "include/dbt/oms_dbt_proj"
+
+# Ambil nilai dari .env (Gaya Senior: No Hardcoding!)
+GCP_PROJECT = os.getenv("GCP_PROJECT_ID", "transactions-practice")
+GCP_DATASET = os.getenv("GCP_DATASET_BRONZE", "bronze")
+GCP_LOCATION = os.getenv("GCP_LOCATION", "asia-southeast1")
+# Secara automatik tentukan full_refresh berdasarkan environment
+IS_PROD = os.getenv("IS_PRODUCTION", "False").lower() == "true"
+
+# --- DBT PROFILE CONFIG ---
+profile_config = ProfileConfig(
+    profile_name="oms_dbt_proj",
+    target_name="dev",
+    profile_mapping=GoogleCloudServiceAccountDictProfileMapping(
+        conn_id="google_cloud_default",
+        profile_args={
+            "project": GCP_PROJECT,
+            "dataset": GCP_DATASET,
+            "location": GCP_LOCATION,
+        },
+    ),
+)
+
+# --- DAG DEFINITION ---
+dbt_dag = DbtDag(
+    project_config=ProjectConfig(DBT_PROJECT_PATH),
+    operator_args={
+        "install_deps": False,
+        "full_refresh": not IS_PROD, # Senior Logic: True dlm dev, False dlm prod
+    },
+    profile_config=profile_config,
+    render_config=RenderConfig(
+        load_method=LoadMode.DBT_LS,
+        dbt_deps=False,
+    ),
+    schedule="0 * * * *",
+    start_date=datetime(2024, 1, 1),
+    catchup=False,
+    dag_id="medallion_practice",
+    # Senior touch: Letak documentation terus dlm UI
+    doc_md=f"""
+    ### Medallion Architecture: Bronze Layer
+    Pipeline ini menguruskan transformasi data dbt untuk projek Medallion.
+    
+    - **Project ID**: `{GCP_PROJECT}`
+    - **Dataset**: `{GCP_DATASET}`
+    - **Environment**: `{"Production" if IS_PROD else "Development (Full Refresh Active)"}`
+    - **Note**: Dioptimasikan untuk BigQuery Sandbox (Free Tier).
+    """,
+)
