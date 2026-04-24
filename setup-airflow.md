@@ -162,3 +162,13 @@ dbt_dag = DbtDag(
     - **Note**: Dioptimasikan untuk BigQuery Sandbox (Free Tier).
     """,
 )
+
+
+__________________________________________________________________________________________
+
+create .env dalam fodler sebaris include & dags (text file) ---> akan jadi bentuk gear
+
+GCP_PROJECT_ID=transactions-practice
+GCP_DATASET_BRONZE=bronze
+GCP_LOCATION=asia-southeast1
+IS_PRODUCTION=False
