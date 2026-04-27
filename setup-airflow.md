@@ -172,3 +172,7 @@ GCP_PROJECT_ID=transactions-practice
 GCP_DATASET_BRONZE=bronze
 GCP_LOCATION=asia-southeast1
 IS_PRODUCTION=False
+
+__________________________________________________________________________________________
+
+
