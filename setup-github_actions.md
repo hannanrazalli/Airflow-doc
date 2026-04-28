@@ -17,10 +17,10 @@ name: Data_Pipeline_CI_Check
 
 on:
   pull_request:
-    branches: [main] # Robot jalan bila kau buat Pull Request ke main
+    branches: [main]
 
 jobs:
-  dbt_and_airflow_check:
+  ci_validation:
     runs-on: ubuntu-latest
     
     steps:
@@ -34,21 +34,35 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install dbt-bigquery
-          pip install pytest  # Untuk test Airflow nanti
+          pip install dbt-bigquery pytest
 
-      - name: Check dbt Models (Compile)
+      - name: Validate dbt Models (Dry Run)
         run: |
           cd include/dbt/oms_dbt_proj
-          dbt compile --profiles-dir . # Robot check kalau SQL kau ada error
+          
+          # Kita buat profile dummy. Tak perlukan key .json yang betul pun!
+          echo "oms_dbt_proj:
+            outputs:
+              dev:
+                type: bigquery
+                method: service-account
+                project: dummy-project
+                dataset: dummy-dataset
+                threads: 1
+                keyfile: dummy-key.json # Fail ni tak wujud pun tak apa untuk compile
+            target: dev" > profiles.yml
+          
+          # Guna 'dbt parse' atau 'dbt compile'. 
+          # Ia akan check syntax SQL tanpa perlu connect ke BigQuery.
+          dbt compile --profiles-dir .
         env:
-          # Robot perlukan info ni untuk compile (tapi tak run data betul pun)
-          GCP_PROJECT_ID: "dummy-project"
-          GCP_LOCATION: "asia-southeast1"
+          DBT_PROFILES_DIR: .
 
       - name: Airflow DAG Integrity Test
         run: |
-          pytest tests/test_dag_integrity.py # Kita akan buat fail ni kejap lagi
+          # Check kalau DAG Airflow kau ada syntax error
+          export AIRFLOW_HOME=$(pwd)
+          pytest tests/test_dag_integrity.py
 
 
 Step 4: Buat Fail "DAG Integrity Test" (Penting!)
