@@ -70,3 +70,5 @@ Push:
 - git add .
 - git commit -m "Testing my first CI pipeline"
 - git push origin feature/test-ci
+
+git rm --cached include/gcp-key.json ---> utk ignore file json service account
