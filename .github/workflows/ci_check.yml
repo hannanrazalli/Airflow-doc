@@ -1,0 +1,36 @@
+name: Data_Pipeline_CI_Check
+
+on:
+  pull_request:
+    branches: [main] # Robot jalan bila kau buat Pull Request ke main
+
+jobs:
+  dbt_and_airflow_check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: |
+          pip install dbt-bigquery
+          pip install pytest  # Untuk test Airflow nanti
+
+      - name: Check dbt Models (Compile)
+        run: |
+          cd include/dbt/oms_dbt_proj
+          dbt compile --profiles-dir . # Robot check kalau SQL kau ada error
+        env:
+          # Robot perlukan info ni untuk compile (tapi tak run data betul pun)
+          GCP_PROJECT_ID: "dummy-project"
+          GCP_LOCATION: "asia-southeast1"
+
+      - name: Airflow DAG Integrity Test
+        run: |
+          pytest tests/test_dag_integrity.py # Kita akan buat fail ni kejap lagi

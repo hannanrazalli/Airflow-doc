@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "transactions-practice",
+  "private_key_id": "ef3e11418d635e35aea9ef29deaaaf46cd4cf182",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDoF5szxuZnYIk/\nf2BUaG5tOMLIV8vCRtKQweTJo9z6NGaBGcBkn+hpjVxKzm9tgiQFd8ujxI22CoSt\nkEGzqAPrJd8PESRYCHveA3jCOqxuVnnkzGCC9etn3S24c+C4gZPsrlwUChAeSjZw\neOs+X7+l5z0NUzFaZb03ahJ6pCayYcmm0MFZoDiPcgnjCP2PDnhVcDQma/StNrh7\nhPx/j9G2OjucMn65+bddSkXkX7qubrEFL70lF0dyNQ22cv02k4bJWog/aLzp7INd\nfylLG0tAVrfJ1dUuEwUG5d4cRo+ZRo4RbVUrYjHbFvYSVAzrXFQYmz6gnjIet1wC\nCoU4XBA5AgMBAAECggEAAoll8ZBFT2Cft/nTjkN63slGRCrpojMEktXuQxsnRKMI\nu5CbFCsL6Bi4dOTI5z80RQzQzj+ffPb2kr3/IPvdL9CKD/fK1er8iOMnpe6H/Yxi\nYaVmSNwms8Ku8zEbLyiA+tgtz20L8fI8htaSEl6mpdwc9o2yK+ER1CxQLUkEMsJw\ntCcjxq52cVZtAfOqLeTl0rmr1Ao6rq/uisgn4thgxdAIeeIKc7YIm2vXhdVafxPu\nFQ/HhkyBNs0VMLoKmRvKoTynmk5gs7OgiK7ax2ZL6LXg/u/au+X/UxVgBnDW6sFo\nx61m8EXDt7tylleboMJH3qgJp5ln3SnfHFLe2TDUMQKBgQD72hrjvKlh2a6Fo19x\nWK/4nlmm1jXyeRlJptoybjl2uNEwyBl0ttVKu7+kx452304FSmAONxpElnJB64ik\nRi3maVHS9uhEso8XjcNcumkVosAHgkd1kXU4B1tUh0220AqVN1bTH5QqSY/rlwms\nNVRyM4AqVNmlacNpyE9BTTX5EQKBgQDr6i/u+N//d2oIaXdnAo1KWY/0zFA5Dfeo\ntyZmLT88b2D2LlBNWQeUOMSNjzN3uBOjmIALNePPftrGtD8uhz+wloLNLbRbxn2c\nTkObt1MkTH38oQipQjqVY4N6ek/W2Ann1QaYN+8KZZelxCkK6i24RMdw3LgSwstS\nm0E4A3BkqQKBgEMMClKMfC9PizWKi7MaICa4yTcwGcaGVKQV5kq8q1Ge3Bn3e0dm\nERxHJTrR4WxmAFhKN44xPy35O0uvT34kLL4FVcIq9ySqwItNsy+xdJ5M6IBXP3ze\nD22uD7NOHfNIKTkWNWgZJRGo6caXO/z7aZLJgRpD4nk10c8Mg4Tn8DFxAoGAf8EI\nSB8aHlvqXbfPY0csgFDT9jsWTm9T6FeWQcrK7c1a8rXN4rUNt6SuPAKKWpCigfs5\ni9iZD2qgyu4dMPMo+FXpa3cOroxkxVpUnmS+b2/E4iPKbu5gjzmen5rQ1YWUh6kC\nszfHCRhO8QOzPifmrl0ArAu62t4GASv2O4ERQlECgYEAqZ+vkrlM5jsuFKDe4ygM\nd0uPtn/d34hfB1yBPZa2kcTT7s9lQIhQQN7Y1pxc0t7EA1+StMttVc+A2cFmq+oQ\nwN73BDt8yt1n38RGEjGmKm1RhEhqOTvgXkvyLJrokji1K9TxqBH/+FcG8P34+WCR\noT1WBLE+WFCFL8plLeQDRCE=\n-----END PRIVATE KEY-----\n",
+  "client_email": "dbt-learn-2@transactions-practice.iam.gserviceaccount.com",
+  "client_id": "102656859575943563644",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/dbt-learn-2%40transactions-practice.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
