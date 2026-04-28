@@ -71,4 +71,24 @@ Push:
 - git commit -m "Testing my first CI pipeline"
 - git push origin feature/test-ci
 
+2. Cara setelkan Error "Push cannot contain secrets"
 git rm --cached include/gcp-key.json ---> utk ignore file json service account
+
+Step B: Update .gitignore
+Buka fail .gitignore kat folder root kau.
+include/gcp-key.json
+.env
+
+
+
+Senior Logic" – Habis tu macam mana Robot CI nak access BigQuery?
+Pergi ke repo GitHub kau kat browser.
+Klik Settings > Secrets and variables > Actions.
+Klik New repository secret.
+Nama: GCP_SA_KEY.
+Value: Copy semua isi kandungan dalam fail gcp-key.json kau dan paste kat situ.
+
+
+git add --all
+git commit -m "Cleanup secret key and prepare for CI"
+git push origin feature/test-ci
