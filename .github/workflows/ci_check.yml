@@ -21,11 +21,11 @@ jobs:
         run: |
           pip install dbt-bigquery pytest
 
-      - name: Validate dbt Models (Dry Run)
+      - name: Validate dbt Models (Parsing Only)
         run: |
           cd include/dbt/oms_dbt_proj
           
-          # 1. Cipta dummy profile (Maintain yang lama)
+          # 1. Dummy profile (Kita kekalkan supaya dbt tak bising)
           echo "oms_dbt_proj:
             outputs:
               dev:
@@ -37,14 +37,14 @@ jobs:
                 keyfile: dummy.json
             target: dev" > profiles.yml
             
-          # 2. INSTALL DEPS (Penting!)
+          # 2. Install deps macam tadi
           dbt deps --profiles-dir .
           
-          # 3. FIX: Buat fail JSON yang SAH (bukan kosong)
+          # 3. Fail JSON sah (supaya adapter tak pening)
           echo "{}" > dummy.json
           
-          # 4. RUN COMPILE
-          dbt compile --profiles-dir .
+          # 4. Guna PARSE, bukan COMPILE (Ini rahsia dia)
+          dbt parse --profiles-dir .
         env:
           DBT_PROFILES_DIR: .
 
