@@ -35,4 +35,4 @@ FROM raw_data
         FROM {{ this }})
 {% endif %}
 
-# Comment untuk test github actions
+# Comment untuk test github
