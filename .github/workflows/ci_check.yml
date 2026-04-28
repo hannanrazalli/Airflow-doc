@@ -25,25 +25,25 @@ jobs:
         run: |
           cd include/dbt/oms_dbt_proj
           
-          # 1. Download packages dulu (Wajib sebab kau ada packages.yml)
-          # Kita letak dummy profiles supaya dia tak bising masa deps
+          # 1. Cipta dummy profile (Maintain yang lama)
           echo "oms_dbt_proj:
             outputs:
               dev:
                 type: bigquery
                 method: service-account
-                project: dummy
-                dataset: dummy
+                project: dummy-project
+                dataset: dummy-dataset
                 threads: 1
                 keyfile: dummy.json
             target: dev" > profiles.yml
             
+          # 2. INSTALL DEPS (Penting!)
           dbt deps --profiles-dir .
           
-          # 2. Buat fail json kosong (supaya compile tak fail)
-          touch dummy.json
+          # 3. FIX: Buat fail JSON yang SAH (bukan kosong)
+          echo "{}" > dummy.json
           
-          # 3. Baru run compile
+          # 4. RUN COMPILE
           dbt compile --profiles-dir .
         env:
           DBT_PROFILES_DIR: .
