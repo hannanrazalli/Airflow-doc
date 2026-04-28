@@ -25,20 +25,25 @@ jobs:
         run: |
           cd include/dbt/oms_dbt_proj
           
-          # Kita buat profile dummy. Tak perlukan key .json yang betul pun!
+          # 1. Download packages dulu (Wajib sebab kau ada packages.yml)
+          # Kita letak dummy profiles supaya dia tak bising masa deps
           echo "oms_dbt_proj:
             outputs:
               dev:
                 type: bigquery
                 method: service-account
-                project: dummy-project
-                dataset: dummy-dataset
+                project: dummy
+                dataset: dummy
                 threads: 1
-                keyfile: dummy-key.json # Fail ni tak wujud pun tak apa untuk compile
+                keyfile: dummy.json
             target: dev" > profiles.yml
+            
+          dbt deps --profiles-dir .
           
-          # Guna 'dbt parse' atau 'dbt compile'. 
-          # Ia akan check syntax SQL tanpa perlu connect ke BigQuery.
+          # 2. Buat fail json kosong (supaya compile tak fail)
+          touch dummy.json
+          
+          # 3. Baru run compile
           dbt compile --profiles-dir .
         env:
           DBT_PROFILES_DIR: .
