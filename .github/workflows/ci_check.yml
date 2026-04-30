@@ -1,6 +1,8 @@
 name: Data_Pipeline_CI_Check
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
 
@@ -20,19 +22,26 @@ jobs:
       - name: Install dbt only
         run: pip install dbt-bigquery
 
+      - name: Create GCP Key File
+        # Langkah ini akan ambil isi JSON dari Secret dan tukar jadi fail fizikal dlm CI
+        run: echo '${{ secrets.GCP_SA_KEY }}' > include/dbt/oms_dbt_proj/gcp-key.json
+
       - name: Run dbt Parse
         run: |
           cd include/dbt/oms_dbt_proj
           
-          # Cipta file dummy supaya dbt diam
-          echo "{}" > dummy.json
+          # Bina profiles.yml yang point ke fail gcp-key.json tadi
           echo "oms_dbt_proj:
             outputs:
               dev:
                 type: bigquery
                 method: service-account
-                project: dummy
-                dataset: dummy
+                project: transactions-practice
+                dataset: bronze
                 threads: 1
-                keyfile: dummy.json
+                keyfile: gcp-key.json
+                location: asia-southeast1
             target: dev" > profiles.yml
+          
+          dbt deps
+          dbt parse
