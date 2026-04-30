@@ -3,9 +3,11 @@ name: Data_Pipeline_Enterprise_CI_CD
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  deploy_and_ingest:
+  integration_tests:  # Guna nama ni supaya "Required check" tu hijau
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
