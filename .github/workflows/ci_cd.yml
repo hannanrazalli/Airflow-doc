@@ -7,6 +7,7 @@ on:
     branches: [main]
 
 jobs:
+  # --- CI: UNTUK TESTING ---
   integration_tests:
     runs-on: ubuntu-latest
     steps:
@@ -25,6 +26,8 @@ jobs:
       - name: Run Airflow DAG Integrity Test
         run: |
           export AIRFLOW_HOME=$(pwd)
+          # --- REPAIR 3: INIT AIRFLOW DB ---
+          airflow db init  
           pytest tests/test_dag_integrity.py
 
       - name: Run dbt Project Check
@@ -45,6 +48,7 @@ jobs:
           dbt deps
           dbt parse
 
+  # --- CD: UNTUK DEPLOY KE BIGQUERY ---
   production_deployment:
     needs: integration_tests
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -61,7 +65,6 @@ jobs:
           cd include/dbt/oms_dbt_proj
           echo '${{ secrets.GCP_SA_KEY }}' > gcp-key.json
           
-          # TARGET prod point ke dataset prod yang kau nak
           echo "oms_dbt_proj:
             outputs:
               prod:
@@ -75,5 +78,5 @@ jobs:
             target: prod" > profiles.yml
           
           dbt deps
-          # Tambah --full-refresh untuk pastikan table tercipta buat kali pertama
+          # Kita guna --full-refresh sekali ni je untuk "paksa" table keluar
           dbt run --target prod --full-refresh
