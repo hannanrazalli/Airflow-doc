@@ -9,37 +9,37 @@ from cosmos.profiles import GoogleCloudServiceAccountDictProfileMapping
 DBT_PROJECT_PATH = Path(os.getenv("AIRFLOW_HOME", "/usr/local/airflow")) / "include/dbt/oms_dbt_proj"
 
 GCP_PROJECT = os.getenv("GCP_PROJECT_ID", "transactions-practice")
-GCP_DATASET = os.getenv("GCP_PROJECT_BRONZE", "bronze")
+GCP_DATASET = os.getenv("GCP_DATASET_BRONZE", "bronze")
 GCP_LOCATION = os.getenv("GCP_LOCATION", "asia-southeast1")
 
 IS_PROD = os.getenv("IS_PRODUCTION", "False").lower() == "true"
 
 profile_config = ProfileConfig(
-    profile_name = "oms_dbt_proj",
-    target_name = "dev",
-    profile_mapping = GoogleCloudServiceAccountDictProfileMapping(
-        conn_id = "google_cloud_default",
-        profile_args = {
-            "project" : GCP_PROJECT,
-            "dataset" : GCP_DATASET,
-            "location" : GCP_LOCATION
+    profile_name="oms_dbt_proj",
+    target_name="dev",
+    profile_mapping=GoogleCloudServiceAccountDictProfileMapping(
+        conn_id="google_cloud_default",
+        profile_args={
+            "project": GCP_PROJECT,
+            "dataset": GCP_DATASET,
+            "location": GCP_LOCATION,
         },
     ),
 )
 
 dbt_dag = DbtDag(
-    project_config = ProjectConfig(DBT_PROJECT_PATH),
-    operator_args = {
-        "install_deps" : True,
-        "full_refresh" : not IS_PROD
+    project_config=ProjectConfig(DBT_PROJECT_PATH),
+    operator_args={
+        "install_deps": False,
+        "full_refresh": not IS_PROD, # Senior Logic: True dlm dev, False dlm prod
     },
-    profile_config = profile_config,
-    render_config = RenderConfig(
-        load_method = LoadMode.DBT_LS,
-        dbt_deps = True
+    profile_config=profile_config,
+    render_config=RenderConfig(
+        load_method=LoadMode.DBT_LS,
+        dbt_deps=False,
     ),
-    schedule = "0 * * * *",
-    start_date = datetime(2024, 1, 1),
-    catchup = False,
-    dag_id = "medallion_practice"
+    schedule="0 * * * *",
+    start_date=datetime(2024, 1, 1),
+    catchup=False,
+    dag_id="medallion_practice"
 )
