@@ -9,9 +9,6 @@ on:
 jobs:
   integration_tests:
     runs-on: ubuntu-latest
-    env:
-      # Kita paksa GitHub guna directory sekarang sebagai Airflow Home
-      AIRFLOW_HOME: ${{ github.workspace }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -27,10 +24,11 @@ jobs:
 
       - name: Run Airflow DAG Integrity Test
         run: |
-          # Buat folder dbt_packages manual supaya Cosmos tak bising masa render
-          mkdir -p include/dbt/oms_dbt_proj/dbt_packages
-          airflow db migrate  
-          pytest tests/test_dag_integrity.py
+          # Kita set AIRFLOW_HOME ke folder sekarang supaya tak ralat sqlite
+          export AIRFLOW_HOME=$(pwd)
+          airflow db migrate
+          # Kita tambah -vv supaya kalau fail kita nampak detail gila
+          pytest tests/test_dag_integrity.py -vv
 
       - name: Run dbt Project Check
         run: |
