@@ -1,0 +1,53 @@
+name: Data_Pipeline_Enterprise_CI_CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  integration_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install apache-airflow dbt-bigquery pytest astronomer-cosmos
+
+      - name: Run Airflow DAG Integrity Test
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          AIRFLOW_HOME: ${{ github.workspace }}
+        run: |
+          # JAMINAN KESELAMATAN: Buang fail lama kalau masih wujud dlm runner
+          rm -f dags/dbt_medallion_dag.py
+          
+          airflow db migrate
+          # -s untuk tengok print debug path kita tadi
+          pytest tests/test_dag_integrity.py -vv -s
+
+      - name: Run dbt Project Check
+        run: |
+          cd include/dbt/oms_dbt_proj
+          echo '${{ secrets.GCP_SA_KEY }}' > gcp-key.json
+          echo "oms_dbt_proj:
+            outputs:
+              dev:
+                type: bigquery
+                method: service-account
+                project: transactions-practice
+                dataset: bronze
+                threads: 1
+                keyfile: gcp-key.json
+                location: asia-southeast1
+            target: dev" > profiles.yml
+          dbt deps
+          dbt parse
