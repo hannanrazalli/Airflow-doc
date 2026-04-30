@@ -7,9 +7,11 @@ on:
     branches: [main]
 
 jobs:
-  # --- CI: UNTUK TESTING ---
   integration_tests:
     runs-on: ubuntu-latest
+    env:
+      # Kita paksa GitHub guna directory sekarang sebagai Airflow Home
+      AIRFLOW_HOME: ${{ github.workspace }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -25,8 +27,8 @@ jobs:
 
       - name: Run Airflow DAG Integrity Test
         run: |
-          export AIRFLOW_HOME=$(pwd)
-          # --- REPAIR: Gunakan 'migrate' untuk Airflow versi baru ---
+          # Buat folder dbt_packages manual supaya Cosmos tak bising masa render
+          mkdir -p include/dbt/oms_dbt_proj/dbt_packages
           airflow db migrate  
           pytest tests/test_dag_integrity.py
 
@@ -47,35 +49,3 @@ jobs:
             target: dev" > profiles.yml
           dbt deps
           dbt parse
-
-  # --- CD: UNTUK DEPLOY KE BIGQUERY ---
-  production_deployment:
-    needs: integration_tests
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Install dbt
-        run: pip install dbt-bigquery
-
-      - name: Deploy & Run dbt Production
-        run: |
-          cd include/dbt/oms_dbt_proj
-          echo '${{ secrets.GCP_SA_KEY }}' > gcp-key.json
-          
-          echo "oms_dbt_proj:
-            outputs:
-              prod:
-                type: bigquery
-                method: service-account
-                project: transactions-practice
-                dataset: bronze_prod
-                threads: 4
-                keyfile: gcp-key.json
-                location: asia-southeast1
-            target: prod" > profiles.yml
-          
-          dbt deps
-          dbt run --target prod --full-refresh

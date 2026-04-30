@@ -5,10 +5,12 @@ from cosmos import DbtDag, ProjectConfig, ProfileConfig, RenderConfig
 from cosmos.constants import LoadMode
 from cosmos.profiles import GoogleCloudServiceAccountDictProfileMapping
 
-# --- REPAIR 1: DYNAMIC PATH ---
-# Ini akan cari folder project secara automatik tak kira dkt mana dia run
-BASE_DIR = Path(__file__).resolve().parent.parent
-DBT_PROJECT_PATH = BASE_DIR / "include" / "dbt" / "oms_dbt_proj"
+# --- FIX PATH TERBARU (SANGAT PENTING) ---
+# Kita guna AIRFLOW_HOME environment variable. 
+# Kalau dlm Docker Astro, dia guna /usr/local/airflow. 
+# Kalau dlm GitHub, dia guna path repository.
+airflow_home = os.environ.get("AIRFLOW_HOME", "/usr/local/airflow")
+DBT_PROJECT_PATH = Path(airflow_home) / "include" / "dbt" / "oms_dbt_proj"
 
 profile_config = ProfileConfig(
     profile_name="oms_dbt_proj",
@@ -26,8 +28,7 @@ profile_config = ProfileConfig(
 dbt_oms_dag = DbtDag(
     project_config=ProjectConfig(
         DBT_PROJECT_PATH,
-        # --- REPAIR 2: FIX COSMOS ERROR ---
-        install_dbt_deps=True, 
+        install_dbt_deps=True, # Biar Cosmos tolong download deps
     ),
     operator_args={
         "install_deps": True,
