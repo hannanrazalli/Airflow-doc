@@ -27,8 +27,11 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}
           AIRFLOW_HOME: ${{ github.workspace }}
         run: |
+          # JAMINAN KESELAMATAN: Buang fail lama kalau masih wujud dlm runner
+          rm -f dags/dbt_medallion_dag.py
+          
           airflow db migrate
-          # -s untuk keluarkan print debug, -vv untuk detail ralat
+          # -s untuk tengok print debug path kita tadi
           pytest tests/test_dag_integrity.py -vv -s
 
       - name: Run dbt Project Check
