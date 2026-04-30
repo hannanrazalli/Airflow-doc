@@ -43,4 +43,4 @@ jobs:
           
           dbt deps
           # INI ADALAH COMMAND YANG AKAN MASUKKAN DATA
-          dbt run --target prod
+          dbt run --target prod --full-refresh
