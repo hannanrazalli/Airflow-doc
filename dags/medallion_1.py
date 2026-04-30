@@ -5,13 +5,18 @@ from cosmos import DbtDag, ProjectConfig, ProfileConfig, RenderConfig
 from cosmos.constants import LoadMode
 from cosmos.profiles import GoogleCloudServiceAccountDictProfileMapping
 
-# --- STRATEGI PATH 100% AUTOMATIK ---
-# Path fail ini: repo/dags/dbt_medallion_dag.py
+# --- CARI PATH SECARA DINAMIK ---
+# Path fail ini: repo/dags/medallion_1.py
 # .parent adalah folder 'dags'
-# .parent.parent adalah 'root repository'
-DAG_FOLDER = Path(__file__).resolve().parent
-REPO_ROOT = DAG_FOLDER.parent
+# .parent.parent adalah root repository
+CURRENT_FILE = Path(__file__).resolve()
+REPO_ROOT = CURRENT_FILE.parent.parent
 DBT_PROJECT_PATH = REPO_ROOT / "include" / "dbt" / "oms_dbt_proj"
+
+# Log untuk debug dlm GitHub Actions
+print(f"DEBUG: Current File: {CURRENT_FILE}")
+print(f"DEBUG: Repo Root: {REPO_ROOT}")
+print(f"DEBUG: dbt Path: {DBT_PROJECT_PATH}")
 
 profile_config = ProfileConfig(
     profile_name="oms_dbt_proj",
@@ -33,7 +38,7 @@ dbt_oms_dag = DbtDag(
         install_dbt_deps=True,
     ),
     operator_args={
-        "install_deps": True, # Untuk Cosmos < 1.9
+        "install_deps": True,
         "full_refresh": True,
     },
     profile_config=profile_config,

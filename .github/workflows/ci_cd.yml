@@ -23,12 +23,13 @@ jobs:
           pip install apache-airflow dbt-bigquery pytest astronomer-cosmos
 
       - name: Run Airflow DAG Integrity Test
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          AIRFLOW_HOME: ${{ github.workspace }}
         run: |
-          # Kita set AIRFLOW_HOME ke folder sekarang supaya tak ralat sqlite
-          export AIRFLOW_HOME=$(pwd)
           airflow db migrate
-          # Kita tambah -vv supaya kalau fail kita nampak detail gila
-          pytest tests/test_dag_integrity.py -vv
+          # -s untuk keluarkan print debug, -vv untuk detail ralat
+          pytest tests/test_dag_integrity.py -vv -s
 
       - name: Run dbt Project Check
         run: |
