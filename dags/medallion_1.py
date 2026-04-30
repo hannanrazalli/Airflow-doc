@@ -11,7 +11,8 @@ from cosmos.profiles import GoogleCloudServiceAccountDictProfileMapping
 # .parent.parent adalah root repository
 CURRENT_FILE = Path(__file__).resolve()
 REPO_ROOT = CURRENT_FILE.parent.parent
-DBT_PROJECT_PATH = REPO_ROOT / "include" / "dbt" / "oms_dbt_proj"
+AIRFLOW_HOME = os.getenv('AIRFLOW_HOME', '/usr/local/airflow')
+DBT_PROJECT_PATH = Path(AIRFLOW_HOME) / "include" / "dbt" / "oms_dbt_proj"
 
 # Log untuk debug dlm GitHub Actions
 print(f"DEBUG: Current File: {CURRENT_FILE}")
@@ -25,7 +26,7 @@ profile_config = ProfileConfig(
         conn_id="google_cloud_default",
         profile_args={
             "project": "transactions-practice",
-            "dataset": "silver",
+            "dataset": "bronze",
             "location": "asia-southeast1",
         },
     ),
@@ -45,7 +46,7 @@ dbt_oms_dag = DbtDag(
     render_config=RenderConfig(
         load_method=LoadMode.DBT_LS,
     ),
-    schedule="@daily",
+    schedule="0 * * * *",
     start_date=datetime(2024, 1, 1),
     catchup=False,
     dag_id="dbt_oms_medallion",
