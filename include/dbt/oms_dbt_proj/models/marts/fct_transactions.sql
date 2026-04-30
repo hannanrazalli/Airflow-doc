@@ -25,7 +25,7 @@ WITH source_data AS (
     FROM {{ source_silver }}
     WHERE _is_deleted = false
     {% if is_incremental() %}
-        AND _processed_at > (SELECT timestamp_sub(max(_processed_at), INTERVAL 1 HOUR)
+        AND _processed_at > (SELECT max(_processed_at)
         FROM {{ this }})
     {% endif %}
 ),
