@@ -26,8 +26,8 @@ jobs:
       - name: Run Airflow DAG Integrity Test
         run: |
           export AIRFLOW_HOME=$(pwd)
-          # --- REPAIR 3: INIT AIRFLOW DB ---
-          airflow db init  
+          # --- REPAIR: Gunakan 'migrate' untuk Airflow versi baru ---
+          airflow db migrate  
           pytest tests/test_dag_integrity.py
 
       - name: Run dbt Project Check
@@ -78,5 +78,4 @@ jobs:
             target: prod" > profiles.yml
           
           dbt deps
-          # Kita guna --full-refresh sekali ni je untuk "paksa" table keluar
           dbt run --target prod --full-refresh
