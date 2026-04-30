@@ -1,0 +1,79 @@
+name: Data_Pipeline_Enterprise_CI_CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  integration_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install apache-airflow dbt-bigquery pytest astronomer-cosmos
+
+      - name: Run Airflow DAG Integrity Test
+        run: |
+          export AIRFLOW_HOME=$(pwd)
+          pytest tests/test_dag_integrity.py
+
+      - name: Run dbt Project Check
+        run: |
+          cd include/dbt/oms_dbt_proj
+          echo '${{ secrets.GCP_SA_KEY }}' > gcp-key.json
+          echo "oms_dbt_proj:
+            outputs:
+              dev:
+                type: bigquery
+                method: service-account
+                project: transactions-practice
+                dataset: bronze
+                threads: 1
+                keyfile: gcp-key.json
+                location: asia-southeast1
+            target: dev" > profiles.yml
+          dbt deps
+          dbt parse
+
+  production_deployment:
+    needs: integration_tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install dbt
+        run: pip install dbt-bigquery
+
+      - name: Deploy & Run dbt Production
+        run: |
+          cd include/dbt/oms_dbt_proj
+          echo '${{ secrets.GCP_SA_KEY }}' > gcp-key.json
+          
+          # TARGET prod point ke dataset prod yang kau nak
+          echo "oms_dbt_proj:
+            outputs:
+              prod:
+                type: bigquery
+                method: service-account
+                project: transactions-practice
+                dataset: bronze_prod
+                threads: 4
+                keyfile: gcp-key.json
+                location: asia-southeast1
+            target: prod" > profiles.yml
+          
+          dbt deps
+          # Tambah --full-refresh untuk pastikan table tercipta buat kali pertama
+          dbt run --target prod --full-refresh

@@ -25,9 +25,8 @@ WITH source_data AS (
     FROM {{ source_silver }}
     WHERE _is_deleted = false
     {% if is_incremental() %}
-        AND _processed_at > (
-            SELECT timestamp_sub(max(_processed_at), INTERVAL 1 HOUR)
-            FROM {{ this }})
+        AND _processed_at > (SELECT timestamp_sub(max(_processed_at), INTERVAL 1 HOUR)
+        FROM {{ this }})
     {% endif %}
 ),
 
@@ -46,5 +45,3 @@ final_staged AS (
 
 SELECT *
 FROM final_staged
-WHERE cust_id IS NOT NULL
-    AND amount > 0
