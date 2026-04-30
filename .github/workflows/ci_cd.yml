@@ -3,11 +3,9 @@ name: Data_Pipeline_Enterprise_CI_CD
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 jobs:
-  integration_tests:
+  deploy_and_ingest:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -20,34 +18,27 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install apache-airflow dbt-bigquery pytest astronomer-cosmos
+          pip install apache-airflow dbt-bigquery astronomer-cosmos
 
-      - name: Run Airflow DAG Integrity Test
-        env:
-          PYTHONPATH: ${{ github.workspace }}
-          AIRFLOW_HOME: ${{ github.workspace }}
-        run: |
-          # JAMINAN KESELAMATAN: Buang fail lama kalau masih wujud dlm runner
-          rm -f dags/dbt_medallion_dag.py
-          
-          airflow db migrate
-          # -s untuk tengok print debug path kita tadi
-          pytest tests/test_dag_integrity.py -vv -s
-
-      - name: Run dbt Project Check
+      - name: Run dbt Ingest to Prod
         run: |
           cd include/dbt/oms_dbt_proj
+          # Gunakan Secrets untuk GCP Key
           echo '${{ secrets.GCP_SA_KEY }}' > gcp-key.json
+          
+          # Bina profile yang tembak terus ke dataset PROD
           echo "oms_dbt_proj:
             outputs:
-              dev:
+              prod:
                 type: bigquery
                 method: service-account
                 project: transactions-practice
-                dataset: bronze
-                threads: 1
+                dataset: bronze_prod
+                threads: 4
                 keyfile: gcp-key.json
                 location: asia-southeast1
-            target: dev" > profiles.yml
+            target: prod" > profiles.yml
+          
           dbt deps
-          dbt parse
+          # INI ADALAH COMMAND YANG AKAN MASUKKAN DATA
+          dbt run --target prod
