@@ -153,7 +153,6 @@ dbt_oms_dag = DbtDag(
     catchup=False,
     dag_id="dbt_oms_medallion",
 )
-
 __________________________________________________________________________________________
 
 create .env dalam fodler sebaris include & dags (text file) ---> akan jadi bentuk gear
