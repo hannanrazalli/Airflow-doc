@@ -5,7 +5,9 @@ from cosmos import DbtDag, ProjectConfig, ProfileConfig, RenderConfig
 from cosmos.constants import LoadMode
 from cosmos.profiles import GoogleCloudServiceAccountDictProfileMapping
 
-DBT_PROJECT_PATH = Path(os.getenv("AIRFLOW_HOME", "/usr/local/airflow")) / "include" / "dbt" / "oms_dbt_proj"
+DAGS_FOLDER = Path(__file__).parent
+REPO_ROOT = DAGS_FOLDER.parent
+DBT_PROJECT_PATH = REPO_ROOT / "include" / "dbt" / "oms_dbt_proj"
 
 GCP_PROJECT = os.getenv("GCP_PROJECT_ID", "transactions-practice")
 GCP_DATASET = os.getenv("GCP_DATASET_BRONZE", "bronze")
