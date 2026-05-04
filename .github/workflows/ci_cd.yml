@@ -35,7 +35,7 @@ jobs:
         run: |
           cd include/dbt/oms_dbt_proj
           dbt deps
-          dbt compile
+          dbt compile --profiles-dir .
 
   # --- STAGE 2: CD (Continuous Deployment) ---
   # Job ini HANYA lari lepas PR di-merge masuk ke main
