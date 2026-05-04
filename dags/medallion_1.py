@@ -29,6 +29,7 @@ dbt_dag = DbtDag(
     operator_args = {
         "install_deps" : True,
         "full_refresh" : True,
+        # "owner": "hannan_razalli",
     },
     profile_config = profile_config,
     render_config = RenderConfig(
@@ -38,5 +39,9 @@ dbt_dag = DbtDag(
     schedule = "0 * * * *",
     start_date = datetime(2024, 1, 1),
     catchup = False,
-    dag_id = "medallion_practice"
+    dag_id = "medallion_practice",
+    default_args = {
+        "owner": "hannan_razalli",
+        "retries": 2
+        }
 )

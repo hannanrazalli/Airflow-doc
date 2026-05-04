@@ -1,4 +1,4 @@
-name: Data_Pipeline_Enterprise_CI_CD
+name: Enterprise_Data_Pipeline
 
 on:
   push:
@@ -7,40 +7,39 @@ on:
     branches: [main]
 
 jobs:
-  integration_tests:  # Guna nama ni supaya "Required check" tu hijau
+  # --- STAGE 1: CI (Jalan untuk PR & Push) ---
+  run_tests:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-
+      
       - name: Install Dependencies
-        run: |
-          pip install apache-airflow dbt-bigquery astronomer-cosmos
+        run: pip install -r requirements.txt
 
-      - name: Run dbt Ingest to Prod
+      - name: Airflow DAG Integrity Test
+        run: pytest tests/test_dag_integrity.py
+
+      - name: dbt Syntax & Compile Check
         run: |
           cd include/dbt/oms_dbt_proj
-          # Gunakan Secrets untuk GCP Key
-          echo '${{ secrets.GCP_SA_KEY }}' > gcp-key.json
-          
-          # Bina profile yang tembak terus ke dataset PROD
-          echo "oms_dbt_proj:
-            outputs:
-              prod:
-                type: bigquery
-                method: service-account
-                project: transactions-practice
-                dataset: bronze_prod
-                threads: 4
-                keyfile: gcp-key.json
-                location: asia-southeast1
-            target: prod" > profiles.yml
-          
           dbt deps
-          # INI ADALAH COMMAND YANG AKAN MASUKKAN DATA
+          dbt compile # Check SQL logic tanpa run data
+
+  # --- STAGE 2: CD (Jalan HANYA lepas Merge ke Main) ---
+  deploy_prod:
+    needs: run_tests                # WAJIB lepas test hijau baru jalan
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup dbt & Deploy
+        run: |
+          cd include/dbt/oms_dbt_proj
+          echo '${{ secrets.GCP_SA_KEY }}' > gcp-key.json
+          # (Profile setup kau kat sini)
+          dbt deps
           dbt run --target prod --full-refresh
