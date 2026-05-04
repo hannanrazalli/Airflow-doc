@@ -1,6 +1,8 @@
-# Astro Runtime includes the following pre-installed providers packages: https://www.astronomer.io/docs/astro/runtime-image-architecture#provider-packages
-apache-airflow-providers-databricks
-astronomer-cosmos  # Ini untuk run dbt
-apache-airflow-providers-google # Untuk BigQuery
-apache-airflow-providers-dbt-cloud
+pytest  # WAJIB ADA untuk lari integriti test
+apache-airflow
+astronomer-cosmos
+apache-airflow-providers-google
 dbt-bigquery
+# Provider lain (optional kalau kau tak guna lagi)
+apache-airflow-providers-databricks
+apache-airflow-providers-dbt-cloud

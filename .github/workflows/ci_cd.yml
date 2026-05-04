@@ -1,4 +1,4 @@
-name: Data_Pipeline_Enterprise_CI_CD
+name: Enterprise_Data_Pipeline
 
 on:
   push:
@@ -7,7 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  integration_tests:  # Guna nama ni supaya "Required check" tu hijau
+  # --- STAGE 1: CI (Continuous Integration) ---
+  run_tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -20,27 +21,57 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install apache-airflow dbt-bigquery astronomer-cosmos
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run dbt Ingest to Prod
+      - name: Airflow DAG Integrity Test
+        run: pytest tests/test_dag_integrity.py
+
+      - name: dbt Compile Check
+        env:
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
         run: |
           cd include/dbt/oms_dbt_proj
-          # Gunakan Secrets untuk GCP Key
-          echo '${{ secrets.GCP_SA_KEY }}' > gcp-key.json
           
-          # Bina profile yang tembak terus ke dataset PROD
-          echo "oms_dbt_proj:
-            outputs:
-              prod:
-                type: bigquery
-                method: service-account
-                project: transactions-practice
-                dataset: bronze_prod
-                threads: 4
-                keyfile: gcp-key.json
-                location: asia-southeast1
-            target: prod" > profiles.yml
+          # FIX: Cipta fail gcp-key.json daripada GitHub Secrets
+          echo "$GCP_SA_KEY" > gcp-key.json
           
           dbt deps
-          # INI ADALAH COMMAND YANG AKAN MASUKKAN DATA
-          dbt run --target prod --full-refresh
+          dbt compile --profiles-dir .
+          
+          # Padam kunci selepas selesai untuk keselamatan ekstra
+          rm gcp-key.json
+
+  # --- STAGE 2: CD (Continuous Deployment) ---
+  deploy_prod:
+    needs: run_tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dbt
+        run: pip install dbt-bigquery
+
+      - name: Deploy to BigQuery Production
+        env:
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+        run: |
+          cd include/dbt/oms_dbt_proj
+          
+          # FIX: Cipta fail kunci untuk proses deployment
+          echo "$GCP_SA_KEY" > gcp-key.json
+          
+          dbt deps
+          # Menjalankan transformasi data sebenar di BigQuery
+          dbt run --target dev --profiles-dir .
+          
+          rm gcp-key.json
