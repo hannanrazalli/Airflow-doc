@@ -34,5 +34,3 @@ FROM raw_data
         SELECT timestamp_sub(max(_ingest_at), INTERVAL 1 HOUR)
         FROM {{ this }})
 {% endif %}
-
-# Comment untuk test github
