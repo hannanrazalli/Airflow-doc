@@ -8,7 +8,6 @@ on:
 
 jobs:
   # --- STAGE 1: CI (Continuous Integration) ---
-  # Job ini lari setiap kali kau push atau buat PR ke main
   run_tests:
     runs-on: ubuntu-latest
     steps:
@@ -23,24 +22,30 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          # Memastikan pytest, airflow, cosmos, dan dbt di-install dalam VM
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Airflow DAG Integrity Test
-        # Menjalankan inspektor .py untuk check syntax & owner
         run: pytest tests/test_dag_integrity.py
 
       - name: dbt Compile Check
-        # Memastikan model SQL dbt kau tak ada syntax error tanpa run data
+        env:
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
         run: |
           cd include/dbt/oms_dbt_proj
+          
+          # FIX: Cipta fail gcp-key.json daripada GitHub Secrets
+          echo "$GCP_SA_KEY" > gcp-key.json
+          
           dbt deps
           dbt compile --profiles-dir .
+          
+          # Padam kunci selepas selesai untuk keselamatan ekstra
+          rm gcp-key.json
 
   # --- STAGE 2: CD (Continuous Deployment) ---
-  # Job ini HANYA lari lepas PR di-merge masuk ke main
   deploy_prod:
-    needs: run_tests                # Wajib lulus test baru boleh deploy
+    needs: run_tests
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
@@ -57,11 +62,16 @@ jobs:
 
       - name: Deploy to BigQuery Production
         env:
-          # Menggunakan rahsia yang kau simpan kat GitHub Secrets
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
         run: |
-          echo "$GCP_SA_KEY" > gcp-key.json
           cd include/dbt/oms_dbt_proj
+          
+          # FIX: Cipta fail kunci untuk proses deployment
+          echo "$GCP_SA_KEY" > gcp-key.json
+          
           dbt deps
           # Menjalankan transformasi data sebenar di BigQuery
-          dbt run --target prod --full-refresh --profiles-dir .
+          dbt run --target dev --profiles-dir .
+          
+          rm gcp-key.json
