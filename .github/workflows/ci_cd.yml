@@ -39,17 +39,16 @@ jobs:
         run: |
           cd include/dbt/oms_dbt_proj
           
-          # Gunakan printf untuk memastikan format JSON tidak rosak
+          # Menggunakan printf untuk memastikan format JSON tidak rosak
           printf "%s" "$GCP_SA_KEY" > gcp-key.json
           
-          # Memberitahu library Google secara global lokasi fail kunci
+          # Memberitahu library Google lokasi fail kunci secara global
           export GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/gcp-key.json
           
           dbt deps
-          # Menambah target dev secara eksplisit untuk dbt CLI
-          dbt compile --profiles-dir . --target dev
+          # Menambah --full-refresh untuk melepasi sekatan Billing/DML pada fasa pengujian
+          dbt compile --profiles-dir . --target dev --full-refresh
           
-          # Padam kunci selepas selesai
           rm gcp-key.json
 
   # --- STAGE 2: CD (Continuous Deployment) ---
@@ -84,7 +83,8 @@ jobs:
           export GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/gcp-key.json
           
           dbt deps
-          # Menjalankan transformasi sebenar
-          dbt run --target dev --profiles-dir .
+          # NOTA: Flag --full-refresh di bawah digunakan untuk membolehkan dbt berfungsi 
+          # tanpa akaun billing yang aktif di BigQuery (DML workaround).
+          dbt run --target dev --profiles-dir . --full-refresh
           
           rm gcp-key.json
