@@ -9,15 +9,13 @@ from cosmos.profiles import GoogleCloudServiceAccountDictProfileMapping
 # Path fail ini: repo/dags/medallion_1.py
 # .parent adalah folder 'dags'
 # .parent.parent adalah root repository
-CURRENT_FILE = Path(__file__).resolve()
-REPO_ROOT = CURRENT_FILE.parent.parent
-AIRFLOW_HOME = os.getenv('AIRFLOW_HOME', '/usr/local/airflow')
-DBT_PROJECT_PATH = Path(AIRFLOW_HOME) / "include" / "dbt" / "oms_dbt_proj"
+# CURRENT_FILE = Path(__file__).resolve()
+# REPO_ROOT = CURRENT_FILE.parent.parent
+DBT_PROJECT_PATH = Path(os.getenv("AIRFLOW_HOME", "/usr/local/airflow")) / "include" / "dbt" / "oms_dbt_proj"
 
-# Log untuk debug dlm GitHub Actions
-print(f"DEBUG: Current File: {CURRENT_FILE}")
-print(f"DEBUG: Repo Root: {REPO_ROOT}")
-print(f"DEBUG: dbt Path: {DBT_PROJECT_PATH}")
+GCP_PROJECT = os.getenv("GCP_PROJECT_ID", "transactions-practice")
+GCP_DATASET = os.getenv("GCP_DATASET_BRONZE", "bronze")
+GCP_LOCATION = os.getenv("GCP_LOCATION", "asia-southeast1")
 
 profile_config = ProfileConfig(
     profile_name="oms_dbt_proj",
@@ -25,9 +23,9 @@ profile_config = ProfileConfig(
     profile_mapping=GoogleCloudServiceAccountDictProfileMapping(
         conn_id="google_cloud_default",
         profile_args={
-            "project": "transactions-practice",
-            "dataset": "bronze",
-            "location": "asia-southeast1",
+            "project": GCP_PROJECT,
+            "dataset": GCP_DATASET,
+            "location": GCP_LOCATION,
         },
     ),
 )
