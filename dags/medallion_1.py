@@ -12,6 +12,7 @@ DBT_PROJECT_PATH = REPO_ROOT / "include" / "dbt" / "oms_dbt_proj"
 GCP_PROJECT = os.getenv("GCP_PROJECT_ID", "transactions-practice")
 GCP_DATASET = os.getenv("GCP_DATASET_BRONZE", "bronze")
 GCP_LOCATION = os.getenv("GCP_LOCATION", "asia-southeast1")
+IS_PROD = os.getenv("IS_PRODUCTION", "False").lower() == "true"
 
 profile_config = ProfileConfig(
     profile_name = "dbt_oms_proj",
@@ -30,7 +31,7 @@ dbt_dag = DbtDag(
     project_config = ProjectConfig(DBT_PROJECT_PATH),
     operator_args = {
         "install_deps" : True,
-        "full_refresh" : True,
+        "full_refresh" : not IS_PROD,
         # "owner": "hannan_razalli",
     },
     profile_config = profile_config,
